@@ -382,36 +382,135 @@ function moveToNextTab(currentTabKey) {
     }
 }
 
-function saveImage() {
+//function saveImage() {
+//
+//    // imageareaを一時的に表示
+//    const imageArea = document.getElementById('savearea');
+//
+//    html2canvas(document.getElementById('savearea'), { 
+//        useCORS: true, 
+//        scale: 2 // スケールを調整して解像度を上げる
+//    }).then(canvas => {
+//        canvas.toBlob(function(blob) {
+//            const link = document.createElement('a');
+//            link.href = URL.createObjectURL(blob);
+//            
+//            // 現在の日時を「yyyyMMdd_HHmmss」形式にフォーマット
+//            const now = new Date();
+//            const year = now.getFullYear();
+//            const month = String(now.getMonth() + 1).padStart(2, '0'); // 月は0から始まるので+1
+//            const day = String(now.getDate()).padStart(2, '0');
+//            const hours = String(now.getHours()).padStart(2, '0');
+//            const minutes = String(now.getMinutes()).padStart(2, '0');
+//            const seconds = String(now.getSeconds()).padStart(2, '0');
+//
+//            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+//            link.download = `原神チェックシート_${formattedDate}.png`; // ファイル名の変更
+//            
+//            link.click();
+//        }, 'image/png');
+//    }).catch(error => {
+//        console.error('Error capturing image:', error);
+//    });
+//}
 
-    // imageareaを一時的に表示
-    const imageArea = document.getElementById('savearea');
+async function saveImage() {
+  const node = document.getElementById('savearea');
 
-    html2canvas(document.getElementById('savearea'), { 
-        useCORS: true, 
-        scale: 2 // スケールを調整して解像度を上げる
-    }).then(canvas => {
-        canvas.toBlob(function(blob) {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            
-            // 現在の日時を「yyyyMMdd_HHmmss」形式にフォーマット
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0'); // 月は0から始まるので+1
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
+  // 1) 画像の読み込み完了を待つ（未読込で撮ると伸び/潰れの原因）
+  await waitForImages(node);
 
-            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
-            link.download = `原神チェックシート_${formattedDate}.png`; // ファイル名の変更
-            
-            link.click();
-        }, 'image/png');
-    }).catch(error => {
-        console.error('Error capturing image:', error);
+  // 2) キャプチャ時だけ変形を無効化（zoom/transform対策）
+  node.classList.add('for-capture');
+
+  try {
+    const canvas = await html2canvas(node, {
+      useCORS: true,
+      scale: 2,
+      onclone: (doc) => {
+        // A) textarea の改行が消える問題対策：クローン側で div に置換
+        const origTAs  = node.querySelectorAll('textarea');
+        const cloneTAs = doc.getElementById('savearea').querySelectorAll('textarea');
+
+        cloneTAs.forEach((ta, i) => {
+          const val = (origTAs[i]?.value ?? ta.value ?? '');
+          const div = doc.createElement('div');
+
+          // 改行と折り返しを維持
+          div.textContent = val;
+          div.style.whiteSpace   = 'pre-wrap';
+          div.style.overflowWrap = 'break-word';
+
+          // 見た目をなるべく合わせる
+          const cs = doc.defaultView.getComputedStyle(ta);
+          div.style.font       = cs.font;
+          div.style.lineHeight = cs.lineHeight;
+          div.style.padding    = cs.padding;
+          div.style.border     = cs.border;
+          div.style.color      = cs.color;
+          div.style.background = cs.background;
+          div.style.minHeight  = cs.height;
+          div.style.width      = cs.width;
+
+          ta.replaceWith(div);
+        });
+
+        // B) 念のため画像のスタイルも安定化
+        doc.getElementById('savearea').querySelectorAll('img').forEach(img => {
+          img.style.width = '100%';
+          img.style.height = 'auto';
+          img.style.objectFit = img.style.objectFit || 'cover';
+        });
+      }
     });
+
+    // 3) ダウンロード
+    await new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+
+        a.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        resolve();
+      }, 'image/png');
+    });
+  } catch (e) {
+    console.error('Error capturing image:', e);
+  } finally {
+    node.classList.remove('for-capture');
+  }
+}
+
+// 画像読み込み待ち（crossOriginも付与）
+function waitForImages(scopeEl) {
+  const imgs = Array.from(scopeEl.querySelectorAll('img'));
+  if (imgs.length === 0) return Promise.resolve();
+
+  imgs.forEach(img => {
+    // CORSエラー回避（同一オリジン以外の画像を使う場合）
+    if (!img.getAttribute('crossorigin')) {
+      img.setAttribute('crossorigin', 'anonymous');
+    }
+  });
+
+  const pending = imgs
+    .filter(img => !img.complete || img.naturalWidth === 0)
+    .map(img => new Promise(res => {
+      img.addEventListener('load', res, { once: true });
+      img.addEventListener('error', res, { once: true }); // エラーでも続行
+    }));
+
+  return Promise.all(pending);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

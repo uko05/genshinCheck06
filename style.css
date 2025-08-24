@@ -514,34 +514,31 @@ header {
     right: 10px; /* 右から10pxの位置 */
 }
 
-/* スマホの縦画面表示に対応 */
-@media only screen and (max-width: 768px) {
+/* スマホの縦画面表示に対応 768px */
+@media only screen and (max-width: 932px) {
+
+    /* 左ペインが非表示の時のスタイル */
+    .sidebar.hidden {
+        transform: translateX(-210px); /* トグルボタンの幅分だけスライド */
+    }
+
+    /* サイドバーのヘッダーのスタイル */
+    .sidebar-header {
+        padding: 5px; /* パディング */
+    }
+
     .container {
-        display: grid;
-        grid-template-columns: repeat(7, minmax(100px, 1fr)); /* 各列を100px固定 */
-        gap: 5px; /* 少し隙間をあける */
-        padding: 10px;
+        overflow-x: auto; /* 横スクロールを有効化 */
+        justify-content: start; /* スクロール位置を左に固定 */
+        padding: 10px 5px 5px 5px;
         max-width: 100%; /* コンテナの幅を画面に合わせる */
         overflow-x: auto; /* 横スクロールを有効化 */
         justify-content: start; /* スクロール位置を左に固定 */
     }
 
-    .cell {
-        width: 100%;
-        height: auto; /* 高さを自動調整 */
-        border-radius: 5px; /* 角を少し丸める */
+    .tab-switch:checked + .tab-label + .tab-content {
+        height: 150px;
+        max-height: calc(100vh - 140px);  /* タブ分だけ引く。数値はUIに合わせて調整 */
     }
 
-    .tabs {
-        flex-direction: column; /* タブを縦並びに */
-    }
-
-    h1 {
-        font-size: 20px; /* タイトルのフォントサイズを縮小 */
-    }
-
-    #save-button {
-        padding: 10px 40px; /* ボタンのサイズを縮小 */
-        font-size: 14px;
-    }
 }
