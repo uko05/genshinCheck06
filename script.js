@@ -382,6 +382,150 @@ function moveToNextTab(currentTabKey) {
     }
 }
 
+// ==== ここから追加ユーティリティ ====
+
+// 各 textarea の直後に .print-proxy を自動生成（初回だけでOK）
+function ensurePrintProxies() {
+  const root = document.getElementById('savearea');
+  if (!root) return;
+  root.querySelectorAll('.entry textarea').forEach(ta => {
+    if (!ta.nextElementSibling || !ta.nextElementSibling.classList.contains('print-proxy')) {
+      const proxy = document.createElement('div');
+      proxy.className = 'print-proxy';
+      ta.insertAdjacentElement('afterend', proxy);
+    }
+  });
+
+  // 任意：ユーザー名 input も統一表示したければ proxy を用意
+  const nameInput = document.getElementById('playerName');
+  if (nameInput && (!nameInput.nextElementSibling || !nameInput.nextElementSibling.classList.contains('print-proxy'))) {
+    const proxy = document.createElement('div');
+    proxy.className = 'print-proxy';
+    nameInput.insertAdjacentElement('afterend', proxy);
+  }
+}
+
+// textarea / input の値を .print-proxy に同期（改行は CSS で保持）
+function syncToProxies() {
+  const root = document.getElementById('savearea');
+
+  // 各 entry 単位で高さ・フォント等を寄せておく
+  root.querySelectorAll('.entry').forEach(entry => {
+    const ta = entry.querySelector('textarea');
+    const proxy = ta && ta.nextElementSibling && ta.nextElementSibling.classList.contains('print-proxy')
+      ? ta.nextElementSibling : null;
+    if (ta && proxy) {
+      proxy.textContent = ta.value || '';
+
+      // 見た目寄せ（必要な分だけ）
+      const cs = getComputedStyle(ta);
+      proxy.style.font = cs.font;
+      proxy.style.lineHeight = cs.lineHeight;
+      proxy.style.padding = cs.padding;
+      proxy.style.border = cs.border;
+      proxy.style.minHeight = `${Math.max(ta.clientHeight, 42)}px`; // つぶれ防止
+      proxy.style.textAlign = cs.textAlign;
+
+      // サイズクラス（small/medium/large）を合わせる（既存のCSSに合わせて）
+      proxy.classList.remove('small','medium','large');
+      ['small','medium','large'].forEach(sz => {
+        if (ta.classList && ta.classList.contains(sz)) proxy.classList.add(sz);
+      });
+    }
+  });
+
+  // ユーザー名 input → プロキシ（任意）
+  const nameInput = document.getElementById('playerName');
+  if (nameInput && nameInput.nextElementSibling && nameInput.nextElementSibling.classList.contains('print-proxy')) {
+    const proxy = nameInput.nextElementSibling;
+    const cs = getComputedStyle(nameInput);
+    proxy.textContent = nameInput.value || '';
+    proxy.style.font = cs.font;
+    proxy.style.lineHeight = cs.lineHeight;
+    proxy.style.padding = cs.padding;
+    proxy.style.border = cs.border;
+    proxy.style.minHeight = `${nameInput.clientHeight}px`;
+    proxy.style.textAlign = cs.textAlign;
+  }
+}
+
+// 画像ロード待ち（既存のを使ってもOK）
+async function waitImagesIn(el){
+  const imgs = Array.from(el.querySelectorAll('img'));
+  if (imgs.length === 0) return;
+  imgs.forEach(img => img.setAttribute('crossorigin','anonymous'));
+  await Promise.all(imgs.map(img => {
+    if (img.complete && img.naturalWidth) return Promise.resolve();
+    return new Promise(res => { img.onload = img.onerror = res; });
+  }));
+}
+
+// ==== ここまでユーティリティ ====
+
+
+// ==== ★ saveImage をこの版に差し替え ★ ====
+async function saveImage() {
+  const node = document.getElementById('savearea');
+
+  // 1) プロキシ用意＆最新値同期
+  ensurePrintProxies();
+  syncToProxies();
+
+  // 2) 保存モードへ（textarea→proxy 表示切替）
+  node.classList.add('is-printing');
+
+  // 3) 画像ロード待ち + transform無効化
+  await waitImagesIn(node);
+  node.classList.add('for-capture');
+
+  try {
+    // 任意：出力解像度をラジオで変えたいとき
+    const scaleMap = { small:1.5, medium:2, large:3 };
+    const sel = (document.querySelector('input[name="size-option"]:checked')||{}).value || 'medium';
+    const scale = scaleMap[sel] || 2;
+
+    const canvas = await html2canvas(node, {
+      useCORS: true,
+      backgroundColor: '#fff',
+      scale
+    });
+
+    await new Promise(res => {
+      canvas.toBlob(async blob => {
+        const p = n => String(n).padStart(2,'0');
+        const d = new Date();
+        const filename = `原神チェックシート_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
+
+        const file = new File([blob], filename, { type:'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files:[file] })) {
+          try { await navigator.share({ files:[file], title:'保存/共有' }); return res(); } catch {}
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove();
+        // 必要なら iOS 保険: window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        res();
+      }, 'image/png');
+    });
+  } catch (e) {
+    console.error('Error capturing image:', e);
+  } finally {
+    // 4) 復帰
+    node.classList.remove('for-capture');
+    node.classList.remove('is-printing');
+  }
+}
+
+// 初期化で一度だけプロキシを用意しておくと安心（必須ではない）
+document.addEventListener('DOMContentLoaded', () => {
+  ensurePrintProxies();
+  // 既存の loadImages() 呼び出しはそのまま
+});
+
 //function saveImage() {
 //
 //    // imageareaを一時的に表示
@@ -413,106 +557,7 @@ function moveToNextTab(currentTabKey) {
 //        console.error('Error capturing image:', error);
 //    });
 //}
-
-async function saveImage() {
-  const node = document.getElementById('savearea');
-
-  // 1) 画像の読み込み完了を待つ（未読込で撮ると伸び/潰れの原因）
-  await waitForImages(node);
-
-  // 2) キャプチャ時だけ変形を無効化（zoom/transform対策）
-  node.classList.add('for-capture');
-
-  try {
-    const canvas = await html2canvas(node, {
-      useCORS: true,
-      scale: 2,
-      onclone: (doc) => {
-        // A) textarea の改行が消える問題対策：クローン側で div に置換
-        const origTAs  = node.querySelectorAll('textarea');
-        const cloneTAs = doc.getElementById('savearea').querySelectorAll('textarea');
-
-        cloneTAs.forEach((ta, i) => {
-          const val = (origTAs[i]?.value ?? ta.value ?? '');
-          const div = doc.createElement('div');
-
-          // 改行と折り返しを維持
-          div.textContent = val;
-          div.style.whiteSpace   = 'pre-wrap';
-          div.style.overflowWrap = 'break-word';
-
-          // 見た目をなるべく合わせる
-          const cs = doc.defaultView.getComputedStyle(ta);
-          div.style.font       = cs.font;
-          div.style.lineHeight = cs.lineHeight;
-          div.style.padding    = cs.padding;
-          div.style.border     = cs.border;
-          div.style.color      = cs.color;
-          div.style.background = cs.background;
-          div.style.minHeight  = cs.height;
-          div.style.width      = cs.width;
-
-          ta.replaceWith(div);
-        });
-
-        // B) 念のため画像のスタイルも安定化
-        doc.getElementById('savearea').querySelectorAll('img').forEach(img => {
-          img.style.width = '100%';
-          img.style.height = 'auto';
-          img.style.objectFit = img.style.objectFit || 'cover';
-        });
-      }
-    });
-
-    // 3) ダウンロード
-    await new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mm = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
-
-        a.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        resolve();
-      }, 'image/png');
-    });
-  } catch (e) {
-    console.error('Error capturing image:', e);
-  } finally {
-    node.classList.remove('for-capture');
-  }
-}
-
-// 画像読み込み待ち（crossOriginも付与）
-function waitForImages(scopeEl) {
-  const imgs = Array.from(scopeEl.querySelectorAll('img'));
-  if (imgs.length === 0) return Promise.resolve();
-
-  imgs.forEach(img => {
-    // CORSエラー回避（同一オリジン以外の画像を使う場合）
-    if (!img.getAttribute('crossorigin')) {
-      img.setAttribute('crossorigin', 'anonymous');
-    }
-  });
-
-  const pending = imgs
-    .filter(img => !img.complete || img.naturalWidth === 0)
-    .map(img => new Promise(res => {
-      img.addEventListener('load', res, { once: true });
-      img.addEventListener('error', res, { once: true }); // エラーでも続行
-    }));
-
-  return Promise.all(pending);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadImages();
-});
+//
+//document.addEventListener('DOMContentLoaded', () => {
+//    loadImages();
+//});
