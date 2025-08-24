@@ -523,7 +523,7 @@ async function saveImage() {
 // 初期化で一度だけプロキシを用意しておくと安心（必須ではない）
 document.addEventListener('DOMContentLoaded', () => {
   ensurePrintProxies();
-  // 既存の loadImages() 呼び出しはそのまま
+  loadImages();
 });
 
 //function saveImage() {
