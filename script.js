@@ -383,148 +383,148 @@ function moveToNextTab(currentTabKey) {
 }
 
 // ==== ここから追加ユーティリティ ====
-
-// 各 textarea の直後に .print-proxy を自動生成（初回だけでOK）
-function ensurePrintProxies() {
+// --- プロキシを用意（初回だけでもOK） ---
+function ensurePrintProxies(){
   const root = document.getElementById('savearea');
   if (!root) return;
-  root.querySelectorAll('.entry textarea').forEach(ta => {
-    if (!ta.nextElementSibling || !ta.nextElementSibling.classList.contains('print-proxy')) {
+
+  // 各エントリの textarea の直下に作る
+  root.querySelectorAll('.entry textarea').forEach(ta=>{
+    if (!ta.nextElementSibling || !ta.nextElementSibling.classList.contains('print-proxy')){
       const proxy = document.createElement('div');
-      proxy.className = 'print-proxy';
+      proxy.className = 'print-proxy';          // 基本
       ta.insertAdjacentElement('afterend', proxy);
     }
   });
 
-  // 任意：ユーザー名 input も統一表示したければ proxy を用意
+  // プレイヤー名 input の直後にも
   const nameInput = document.getElementById('playerName');
-  if (nameInput && (!nameInput.nextElementSibling || !nameInput.nextElementSibling.classList.contains('print-proxy'))) {
+  if (nameInput && (!nameInput.nextElementSibling || !nameInput.nextElementSibling.classList.contains('print-proxy'))){
     const proxy = document.createElement('div');
-    proxy.className = 'print-proxy';
+    proxy.className = 'print-proxy value-yoko'; // ← input と同じ見た目にする
     nameInput.insertAdjacentElement('afterend', proxy);
   }
 }
 
-// textarea / input の値を .print-proxy に同期（改行は CSS で保持）
-function syncToProxies() {
+// --- 値と見た目をプロキシに同期（クラスもコピーして高さを揃える） ---
+function syncToProxies(){
   const root = document.getElementById('savearea');
 
-  // 各 entry 単位で高さ・フォント等を寄せておく
-  root.querySelectorAll('.entry').forEach(entry => {
+  // textarea → proxy
+  root.querySelectorAll('.entry').forEach(entry=>{
     const ta = entry.querySelector('textarea');
-    const proxy = ta && ta.nextElementSibling && ta.nextElementSibling.classList.contains('print-proxy')
-      ? ta.nextElementSibling : null;
-    if (ta && proxy) {
-      proxy.textContent = ta.value || '';
+    const proxy = ta?.nextElementSibling?.classList.contains('print-proxy') ? ta.nextElementSibling : null;
+    if (!ta || !proxy) return;
+    proxy.textContent = ta.value || '';
 
-      // 見た目寄せ（必要な分だけ）
-      const cs = getComputedStyle(ta);
-      proxy.style.font = cs.font;
-      proxy.style.lineHeight = cs.lineHeight;
-      proxy.style.padding = cs.padding;
-      proxy.style.border = cs.border;
-      proxy.style.minHeight = `${Math.max(ta.clientHeight, 42)}px`; // つぶれ防止
-      proxy.style.textAlign = cs.textAlign;
+    // クラス合わせ（small/medium/large 等）
+    proxy.className = `print-proxy ${ta.className || ''}`;
 
-      // サイズクラス（small/medium/large）を合わせる（既存のCSSに合わせて）
-      proxy.classList.remove('small','medium','large');
-      ['small','medium','large'].forEach(sz => {
-        if (ta.classList && ta.classList.contains(sz)) proxy.classList.add(sz);
-      });
-    }
+    // スタイル寄せ
+    const cs = getComputedStyle(ta);
+    proxy.style.font        = cs.font;
+    proxy.style.lineHeight  = cs.lineHeight;
+    proxy.style.padding     = cs.padding;
+    proxy.style.border      = cs.border;
+    proxy.style.textAlign   = cs.textAlign;
+    proxy.style.minHeight   = `${Math.max(ta.clientHeight, 42)}px`;
+    proxy.style.width       = '100%';
+    proxy.style.boxSizing   = 'border-box';
+    proxy.style.background  = '#fff';
   });
 
-  // ユーザー名 input → プロキシ（任意）
-  const nameInput = document.getElementById('playerName');
-  if (nameInput && nameInput.nextElementSibling && nameInput.nextElementSibling.classList.contains('print-proxy')) {
-    const proxy = nameInput.nextElementSibling;
-    const cs = getComputedStyle(nameInput);
-    proxy.textContent = nameInput.value || '';
-    proxy.style.font = cs.font;
-    proxy.style.lineHeight = cs.lineHeight;
-    proxy.style.padding = cs.padding;
-    proxy.style.border = cs.border;
-    proxy.style.minHeight = `${nameInput.clientHeight}px`;
-    proxy.style.textAlign = cs.textAlign;
+  // 名前 input → proxy（任意）
+  const inp = document.getElementById('playerName');
+  const pxy = inp?.nextElementSibling?.classList.contains('print-proxy') ? inp.nextElementSibling : null;
+  if (inp && pxy){
+    pxy.textContent = inp.value || '';
+    // クラスを value-yoko に寄せる（見た目を完全一致させる）
+    pxy.className = `print-proxy ${inp.className || ''}`;
+    const cs = getComputedStyle(inp);
+    pxy.style.font        = cs.font;
+    pxy.style.lineHeight  = cs.lineHeight;
+    pxy.style.padding     = cs.padding;
+    pxy.style.border      = cs.border;
+    pxy.style.minHeight   = `${inp.clientHeight}px`;
+    pxy.style.boxSizing   = 'border-box';
+    pxy.style.background  = '#fff';
   }
 }
 
-// 画像ロード待ち（既存のを使ってもOK）
+// --- 画像ロード待ち ---
 async function waitImagesIn(el){
   const imgs = Array.from(el.querySelectorAll('img'));
-  if (imgs.length === 0) return;
   imgs.forEach(img => img.setAttribute('crossorigin','anonymous'));
-  await Promise.all(imgs.map(img => {
+  await Promise.all(imgs.map(img=>{
     if (img.complete && img.naturalWidth) return Promise.resolve();
-    return new Promise(res => { img.onload = img.onerror = res; });
+    return new Promise(res=>{ img.onload=res; img.onerror=res; });
   }));
 }
 
-// ==== ここまでユーティリティ ====
-
-
-// ==== ★ saveImage をこの版に差し替え ★ ====
-async function saveImage() {
+// --- ★ 保存本体：例外でも必ず .is-printing を外す ---
+async function saveImage(){
   const node = document.getElementById('savearea');
+  try{
+    ensurePrintProxies();
+    syncToProxies();
 
-  // 1) プロキシ用意＆最新値同期
-  ensurePrintProxies();
-  syncToProxies();
+    node.classList.add('is-printing');  // ← ここでスワップ
+    node.classList.add('for-capture');
 
-  // 2) 保存モードへ（textarea→proxy 表示切替）
-  node.classList.add('is-printing');
+    await waitImagesIn(node);
 
-  // 3) 画像ロード待ち + transform無効化
-  await waitImagesIn(node);
-  node.classList.add('for-capture');
-
-  try {
-    // 任意：出力解像度をラジオで変えたいとき
-    const scaleMap = { small:1.5, medium:2, large:3 };
-    const sel = (document.querySelector('input[name="size-option"]:checked')||{}).value || 'medium';
-    const scale = scaleMap[sel] || 2;
-
-    const canvas = await html2canvas(node, {
-      useCORS: true,
-      backgroundColor: '#fff',
+    const scale = 2; // ラジオ連動ならここで切替
+    const canvas = await html2canvas(node,{
+      useCORS:true,
+      backgroundColor:'#fff',
       scale
     });
 
-    await new Promise(res => {
-      canvas.toBlob(async blob => {
-        const p = n => String(n).padStart(2,'0');
-        const d = new Date();
-        const filename = `原神チェックシート_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
+    await new Promise(resolve=>{
+      canvas.toBlob(async blob=>{
+        const p=n=>String(n).padStart(2,'0');
+        const d=new Date();
+        const fn=`原神チェックシート_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
+        const file=new File([blob],fn,{type:'image/png'});
 
-        const file = new File([blob], filename, { type:'image/png' });
-
-        if (navigator.canShare && navigator.canShare({ files:[file] })) {
-          try { await navigator.share({ files:[file], title:'保存/共有' }); return res(); } catch {}
+        if (navigator.canShare && navigator.canShare({files:[file]})){
+          try{ await navigator.share({files:[file],title:'保存/共有'}); return resolve(); }catch{}
         }
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = filename;
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download=fn;
         document.body.appendChild(a); a.click(); a.remove();
-        // 必要なら iOS 保険: window.open(url, '_blank');
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
-        res();
-      }, 'image/png');
+        setTimeout(()=>URL.revokeObjectURL(url),10000);
+        resolve();
+      },'image/png');
     });
-  } catch (e) {
-    console.error('Error capturing image:', e);
-  } finally {
-    // 4) 復帰
+  }catch(err){
+    console.error(err);           // ← ①「反応しない」時の原因がここに出る
+    alert('保存時にエラーが発生しました（詳細はコンソール参照）');
+  }finally{
+    // 例外が出ても必ず元に戻す（②の“変な箱”も消える）
     node.classList.remove('for-capture');
     node.classList.remove('is-printing');
   }
 }
 
-// 初期化で一度だけプロキシを用意しておくと安心（必須ではない）
-document.addEventListener('DOMContentLoaded', () => {
-  ensurePrintProxies();
-  loadImages();
+document.addEventListener('DOMContentLoaded', ()=>{
+  ensurePrintProxies();               // 保存用のプロキシ準備
+  loadImages();                       // ★ 画像リスト生成＆タブ動作セットアップ
+
+  const btn = document.getElementById('save-button');
+  if (btn){
+    btn.onclick = null;               // 重複バインド防止
+    btn.addEventListener('click', saveImage);
+  }
 });
+
+
+// ==== ここまでユーティリティ ====
+
+
+// ==== ★ saveImage をこの版に差し替え ★ ====
+
 
 //function saveImage() {
 //

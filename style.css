@@ -458,22 +458,28 @@ header {
     display: none;
 }
 
-.print-proxy{
-  display:none;
-  white-space:pre-wrap;
-  word-break:break-word;
-  border:1px solid #ccc;
-  padding:4px;
-  font-size:12px;
-  box-sizing:border-box;
-  background:#fff;
-  min-height:42px; /* 既存textareaに合わせる */
-}
+/* プロキシは通常は非表示 */
+.print-proxy{ display:none; white-space:pre-wrap; word-break:break-word; }
 
-.is-printing textarea{ display:none !important; }
+/* 保存モードだけ textarea/input を隠し、プロキシを表示 */
+.is-printing textarea,
+.is-printing input[type="text"]{ display:none !important; }
 .is-printing .print-proxy{ display:block !important; }
 
-#savearea{ background:#fff; } /* 透過防止 */
+/* プレイヤー名の横に出る“変な箱”対策：
+   プロキシが input と同じクラス(= .value-yoko)を持っていれば見た目が揃う */
+.print-proxy.value-yoko{
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #ccc;   /* input と同じ境界線にするなら */
+  padding: 4px;
+  background:#fff;
+}
+
+/* 透過/黒背景対策 */
+#savearea{ background:#fff; }
 
 #save-button {
     background-color: #007bff; /* TierMakerに似た青色 */
