@@ -330,18 +330,6 @@ function moveToNextTab(currentTabKey) {
       if (label) label.remove();
     }
 
-    //function updateImageNumbers(tabCategory) {
-    //
-    //    const selectedCategory = tabSelections[tabCategory] || [];
-    //
-    //    selectedCategory.forEach((src, index) => {
-    //        const imgContainer = document.querySelector(`.image-item[data-src="${src}"]`).parentElement;
-    //        addNumberingAndBorder(imgContainer, index + 1);
-    //    });
-    //    tabSelections[tabCategory] = selectedCategory; // 選択状態を更新
-    //
-    //}
-
     function restoreSelectionState(tabKey, category, scopeEl) {
       const selected = tabSelections[tabKey] || [];
       scopeEl.querySelectorAll(`.image-item[data-category="${category}"]`).forEach(img => {
@@ -365,260 +353,51 @@ function moveToNextTab(currentTabKey) {
 
 //-----------------------------------------------------------------------------------------
 
-//async function saveImage() {
-//  const node = document.getElementById('savearea');
-//
-//  // 1) 保存モードに切替
-//  node.classList.add('is-printing');
-//
-//  // 2) textarea内容をproxyに転記
-//  document.querySelectorAll('#savearea .entry').forEach(entry => {
-//    const ta = entry.querySelector('textarea');
-//    const proxy = entry.querySelector('.print-proxy');
-//    if (ta && proxy) {
-//      proxy.textContent = ta.value;
-//    }
-//  });
-//
-//  try {
-//    // 3) キャプチャ実行
-//    const canvas = await html2canvas(node, {
-//      useCORS: true,
-//      scale: 2
-//    });
-//
-//    // 4) ダウンロード処理
-//    canvas.toBlob(function(blob) {
-//      const link = document.createElement('a');
-//      link.href = URL.createObjectURL(blob);
-//
-//      const now = new Date();
-//      const y = now.getFullYear();
-//      const m = String(now.getMonth()+1).padStart(2,'0');
-//      const d = String(now.getDate()).padStart(2,'0');
-//      const hh = String(now.getHours()).padStart(2,'0');
-//      const mm = String(now.getMinutes()).padStart(2,'0');
-//      const ss = String(now.getSeconds()).padStart(2,'0');
-//
-//      link.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
-//      link.click();
-//    }, 'image/png');
-//  } catch(e) {
-//    console.error(e);
-//  } finally {
-//    // 5) 復元
-//    node.classList.remove('is-printing');
-//  }
-//}
-
-
-//-----------------------------------------------------------------------------------------
-
-
-//function copyTextareaLook(ta, proxy) {
-//  proxy.textContent = ta.value ?? '';
-//
-//  const rect = ta.getBoundingClientRect();
-//  proxy.style.width     = Math.round(rect.width)  + 'px';
-//  proxy.style.minHeight = Math.round(rect.height) + 'px';
-//
-//  const cs = getComputedStyle(ta);
-//  const props = [
-//    'font', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight',
-//    'letterSpacing', 'wordSpacing',
-//    'textAlign', 'textTransform',
-//    'padding', 'boxSizing', 'color', 'backgroundColor'
-//  ];
-//  props.forEach(p => proxy.style[p] = cs[p]);
-//
-//  // borderを明示的にコピー
-//  proxy.style.borderTop    = cs.borderTop;
-//  proxy.style.borderRight  = cs.borderRight;
-//  proxy.style.borderBottom = cs.borderBottom;
-//  proxy.style.borderLeft   = cs.borderLeft;
-//
-//  proxy.style.whiteSpace   = 'pre-wrap';
-//  proxy.style.overflowWrap = 'break-word';
-//  proxy.style.wordBreak    = 'break-word';
-//}
-//
-//function enterPrintMode() {
-//  const root = document.getElementById('savearea');
-//
-//  // 各entryのtextarea -> proxy
-//  root.querySelectorAll('.entry').forEach(entry => {
-//    const ta    = entry.querySelector('textarea');
-//    const proxy = entry.querySelector('.print-proxy');
-//    if (ta && proxy) copyTextareaLook(ta, proxy);
-//  });
-//
-//  // ユーザー名 input -> proxy も同様に（幅やフォント差で回り込みが変わるため）
-//  const nameInput = document.getElementById('playerName');
-//  const nameProxy = nameInput?.nextElementSibling?.classList.contains('print-proxy')
-//    ? nameInput.nextElementSibling : null;
-//  if (nameInput && nameProxy) {
-//    nameProxy.textContent = nameInput.value || nameInput.placeholder || '';
-//    const rect = nameInput.getBoundingClientRect();
-//    nameProxy.style.width     = Math.round(rect.width)  + 'px';
-//    nameProxy.style.minHeight = Math.round(rect.height) + 'px';
-//    const cs = getComputedStyle(nameInput);
-//    ['font','fontFamily','fontSize','fontWeight','lineHeight',
-//     'letterSpacing','wordSpacing','textAlign','padding','border',
-//     'boxSizing','color','backgroundColor'
-//    ].forEach(p => nameProxy.style[p] = cs[p]);
-//  }
-//
-//  root.classList.add('is-printing');   // textarea/input を隠して proxy を表示
-//}
-//
-//function exitPrintMode() {
-//  document.getElementById('savearea').classList.remove('is-printing');
-//}
-//
-//async function saveImage() {
-//  const node = document.getElementById('savearea');
-//  try {
-//    enterPrintMode();
-//
-//    // 画像の読み込み待ち（既存でOK）
-//    await Promise.all(Array.from(node.querySelectorAll('img'))
-//      .filter(img => !img.complete || img.naturalWidth === 0)
-//      .map(img => new Promise(res => {
-//        img.addEventListener('load', res, { once: true });
-//        img.addEventListener('error', res, { once: true });
-//      }))
-//    );
-//
-//    const canvas = await html2canvas(node, { useCORS: true, scale: 2 });
-//    canvas.toBlob(blob => {
-//      const a = document.createElement('a');
-//      a.href = URL.createObjectURL(blob);
-//      const n = new Date();
-//      const pad = v => String(v).padStart(2,'0');
-//      a.download = `原神チェックシート_${n.getFullYear()}${pad(n.getMonth()+1)}${pad(n.getDate())}_${pad(n.getHours())}${pad(n.getMinutes())}${pad(n.getSeconds())}.png`;
-//      a.click();
-//      URL.revokeObjectURL(a.href);
-//    }, 'image/png');
-//  } finally {
-//    exitPrintMode();
-//  }
-//}
-/* 1) textarea の下に .print-proxy を自動で用意しておく */
-function ensurePrintProxies() {
-  document.querySelectorAll('#savearea .entry').forEach(entry => {
-    const ta = entry.querySelector('textarea');
-    if (!ta) return;
-    if (!entry.querySelector('.print-proxy')) {
-      const proxy = document.createElement('div');
-      proxy.className = 'print-proxy';
-      ta.insertAdjacentElement('afterend', proxy);
-    }
-  });
-}
-
-/* 2) textarea の見た目&内容を .print-proxy にコピー */
-function copyTextareaLook(ta, proxy) {
-  proxy.textContent = ta.value ?? '';
-
-  // サイズは実寸でコピー
-  const rect = ta.getBoundingClientRect();
-  proxy.style.width     = Math.round(rect.width)  + 'px';
-  proxy.style.minHeight = Math.round(rect.height) + 'px';
-
-  const cs = getComputedStyle(ta);
-  // よく効くプロパティ群
-  [
-    'font','fontFamily','fontSize','fontWeight','lineHeight',
-    'letterSpacing','wordSpacing',
-    'textAlign','textTransform',
-    'padding','boxSizing','color','backgroundColor'
-  ].forEach(p => proxy.style[p] = cs[p]);
-
-  // border はショートハンドだと空になることがあるので四辺を個別に
-  proxy.style.borderTop    = cs.borderTop;
-  proxy.style.borderRight  = cs.borderRight;
-  proxy.style.borderBottom = cs.borderBottom;
-  proxy.style.borderLeft   = cs.borderLeft;
-
-  // 改行・折返し
-  proxy.style.whiteSpace   = 'pre-wrap';
-  proxy.style.overflowWrap = 'break-word';
-  proxy.style.wordBreak    = 'break-word';
-}
-
-/* 3) 全 proxy を最新化 */
-function syncTextareasToProxies() {
-  document.querySelectorAll('#savearea .entry').forEach(entry => {
-    const ta    = entry.querySelector('textarea');
-    const proxy = entry.querySelector('.print-proxy');
-    if (ta && proxy) copyTextareaLook(ta, proxy);
-  });
-}
-
-/* 4) 画像の読み込み待ち（保険） */
-function waitForImages(scopeEl) {
-  const imgs = Array.from(scopeEl.querySelectorAll('img'));
-  const pending = imgs
-    .filter(img => !img.complete || img.naturalWidth === 0)
-    .map(img => new Promise(res => {
-      img.addEventListener('load', res, { once:true });
-      img.addEventListener('error', res, { once:true });
-      // CORS保険
-      if (!img.getAttribute('crossorigin')) img.setAttribute('crossorigin','anonymous');
-    }));
-  return Promise.all(pending);
-}
-
-/* 5) 保存本体（非同期） */
 async function saveImage() {
   const node = document.getElementById('savearea');
 
-  // textarea → proxy へ転記
-  syncTextareasToProxies();
-
-  // 印刷モードに切替（textareaを隠し、proxyを表示）
+  // 1) 保存モードに切替
   node.classList.add('is-printing');
 
+  // 2) textarea内容をproxyに転記
+  document.querySelectorAll('#savearea .entry').forEach(entry => {
+    const ta = entry.querySelector('textarea');
+    const proxy = entry.querySelector('.print-proxy');
+    if (ta && proxy) {
+      proxy.textContent = ta.value;
+    }
+  });
+
   try {
-    await waitForImages(node);
+    // 3) キャプチャ実行
     const canvas = await html2canvas(node, {
       useCORS: true,
       scale: 2
     });
 
-    await new Promise(resolve => {
-      canvas.toBlob(blob => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        const t = new Date();
-        const pad = n => String(n).padStart(2,'0');
-        a.download = `原神チェックシート_${t.getFullYear()}${pad(t.getMonth()+1)}${pad(t.getDate())}_${pad(t.getHours())}${pad(t.getMinutes())}${pad(t.getSeconds())}.png`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        resolve();
-      }, 'image/png');
-    });
-  } catch (e) {
-    console.error('capture failed:', e);
-    alert('画像の保存でエラーが出ました。コンソールを確認してください。');
+    // 4) ダウンロード処理
+    canvas.toBlob(function(blob) {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth()+1).padStart(2,'0');
+      const d = String(now.getDate()).padStart(2,'0');
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+
+      link.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
+      link.click();
+    }, 'image/png');
+  } catch(e) {
+    console.error(e);
   } finally {
+    // 5) 復元
     node.classList.remove('is-printing');
   }
 }
-
-/* 6) 初期化（ボタンの紐付けは一度だけ・重複防止） */
-document.addEventListener('DOMContentLoaded', () => {
-  ensurePrintProxies();
-  const btn = document.getElementById('save-button');
-  if (btn) {
-    btn.replaceWith(btn.cloneNode(true)); // 既存リスナ掃除技巧
-    const freshBtn = document.getElementById('save-button');
-    freshBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      saveImage().catch(console.error);
-    });
-  }
-});
 
 document.addEventListener('DOMContentLoaded', () => {
     loadImages();

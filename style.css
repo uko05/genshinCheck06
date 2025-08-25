@@ -357,6 +357,7 @@ header {
   padding: 4px;
 }
 
+
 /* キャプチャ中は textarea を隠して print-proxy を表示 */
 .is-printing textarea {
   display: none !important;
