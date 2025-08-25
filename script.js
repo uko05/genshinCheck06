@@ -111,8 +111,6 @@ const imageData = [
     { src: 'Lisa.png', category: 'chara' },
     { src: 'Kaeya.png', category: 'chara' },
     { src: 'amber.png', category: 'chara' },
-    { src: 'sora.png', category: 'chara' },
-    { src: 'hotaru.png', category: 'chara' },
     
     { src: 'version/5_8.png', category: 'version' },
     { src: 'version/5_7.png', category: 'version' },
@@ -382,182 +380,38 @@ function moveToNextTab(currentTabKey) {
     }
 }
 
-// ==== ここから追加ユーティリティ ====
-// --- プロキシを用意（初回だけでもOK） ---
-function ensurePrintProxies(){
-  const root = document.getElementById('savearea');
-  if (!root) return;
+function saveImage() {
 
-  // 各エントリの textarea の直下に作る
-  root.querySelectorAll('.entry textarea').forEach(ta=>{
-    if (!ta.nextElementSibling || !ta.nextElementSibling.classList.contains('print-proxy')){
-      const proxy = document.createElement('div');
-      proxy.className = 'print-proxy';          // 基本
-      ta.insertAdjacentElement('afterend', proxy);
-    }
-  });
+    // imageareaを一時的に表示
+    const imageArea = document.getElementById('savearea');
 
-  // プレイヤー名 input の直後にも
-  const nameInput = document.getElementById('playerName');
-  if (nameInput && (!nameInput.nextElementSibling || !nameInput.nextElementSibling.classList.contains('print-proxy'))){
-    const proxy = document.createElement('div');
-    proxy.className = 'print-proxy value-yoko'; // ← input と同じ見た目にする
-    nameInput.insertAdjacentElement('afterend', proxy);
-  }
-}
+    html2canvas(document.getElementById('savearea'), { 
+        useCORS: true, 
+        scale: 2 // スケールを調整して解像度を上げる
+    }).then(canvas => {
+        canvas.toBlob(function(blob) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            // 現在の日時を「yyyyMMdd_HHmmss」形式にフォーマット
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // 月は0から始まるので+1
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
 
-// --- 値と見た目をプロキシに同期（クラスもコピーして高さを揃える） ---
-function syncToProxies(){
-  const root = document.getElementById('savearea');
-
-  // textarea → proxy
-  root.querySelectorAll('.entry').forEach(entry=>{
-    const ta = entry.querySelector('textarea');
-    const proxy = ta?.nextElementSibling?.classList.contains('print-proxy') ? ta.nextElementSibling : null;
-    if (!ta || !proxy) return;
-    proxy.textContent = ta.value || '';
-
-    // クラス合わせ（small/medium/large 等）
-    proxy.className = `print-proxy ${ta.className || ''}`;
-
-    // スタイル寄せ
-    const cs = getComputedStyle(ta);
-    proxy.style.font        = cs.font;
-    proxy.style.lineHeight  = cs.lineHeight;
-    proxy.style.padding     = cs.padding;
-    proxy.style.border      = cs.border;
-    proxy.style.textAlign   = cs.textAlign;
-    proxy.style.minHeight   = `${Math.max(ta.clientHeight, 42)}px`;
-    proxy.style.width       = '100%';
-    proxy.style.boxSizing   = 'border-box';
-    proxy.style.background  = '#fff';
-  });
-
-  // 名前 input → proxy（任意）
-  const inp = document.getElementById('playerName');
-  const pxy = inp?.nextElementSibling?.classList.contains('print-proxy') ? inp.nextElementSibling : null;
-  if (inp && pxy){
-    pxy.textContent = inp.value || '';
-    // クラスを value-yoko に寄せる（見た目を完全一致させる）
-    pxy.className = `print-proxy ${inp.className || ''}`;
-    const cs = getComputedStyle(inp);
-    pxy.style.font        = cs.font;
-    pxy.style.lineHeight  = cs.lineHeight;
-    pxy.style.padding     = cs.padding;
-    pxy.style.border      = cs.border;
-    pxy.style.minHeight   = `${inp.clientHeight}px`;
-    pxy.style.boxSizing   = 'border-box';
-    pxy.style.background  = '#fff';
-  }
-}
-
-// --- 画像ロード待ち ---
-async function waitImagesIn(el){
-  const imgs = Array.from(el.querySelectorAll('img'));
-  imgs.forEach(img => img.setAttribute('crossorigin','anonymous'));
-  await Promise.all(imgs.map(img=>{
-    if (img.complete && img.naturalWidth) return Promise.resolve();
-    return new Promise(res=>{ img.onload=res; img.onerror=res; });
-  }));
-}
-
-// --- ★ 保存本体：例外でも必ず .is-printing を外す ---
-async function saveImage(){
-  const node = document.getElementById('savearea');
-  try{
-    ensurePrintProxies();
-    syncToProxies();
-
-    node.classList.add('is-printing');  // ← ここでスワップ
-    node.classList.add('for-capture');
-
-    await waitImagesIn(node);
-
-    const scale = 2; // ラジオ連動ならここで切替
-    const canvas = await html2canvas(node,{
-      useCORS:true,
-      backgroundColor:'#fff',
-      scale
+            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+            link.download = `原神チェックシート_${formattedDate}.png`; // ファイル名の変更
+            
+            link.click();
+        }, 'image/png');
+    }).catch(error => {
+        console.error('Error capturing image:', error);
     });
-
-    await new Promise(resolve=>{
-      canvas.toBlob(async blob=>{
-        const p=n=>String(n).padStart(2,'0');
-        const d=new Date();
-        const fn=`原神チェックシート_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.png`;
-        const file=new File([blob],fn,{type:'image/png'});
-
-        if (navigator.canShare && navigator.canShare({files:[file]})){
-          try{ await navigator.share({files:[file],title:'保存/共有'}); return resolve(); }catch{}
-        }
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a');
-        a.href=url; a.download=fn;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url),10000);
-        resolve();
-      },'image/png');
-    });
-  }catch(err){
-    console.error(err);           // ← ①「反応しない」時の原因がここに出る
-    alert('保存時にエラーが発生しました（詳細はコンソール参照）');
-  }finally{
-    // 例外が出ても必ず元に戻す（②の“変な箱”も消える）
-    node.classList.remove('for-capture');
-    node.classList.remove('is-printing');
-  }
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  ensurePrintProxies();               // 保存用のプロキシ準備
-  loadImages();                       // ★ 画像リスト生成＆タブ動作セットアップ
-
-  const btn = document.getElementById('save-button');
-  if (btn){
-    btn.onclick = null;               // 重複バインド防止
-    btn.addEventListener('click', saveImage);
-  }
+document.addEventListener('DOMContentLoaded', () => {
+    loadImages();
 });
-
-
-// ==== ここまでユーティリティ ====
-
-
-// ==== ★ saveImage をこの版に差し替え ★ ====
-
-
-//function saveImage() {
-//
-//    // imageareaを一時的に表示
-//    const imageArea = document.getElementById('savearea');
-//
-//    html2canvas(document.getElementById('savearea'), { 
-//        useCORS: true, 
-//        scale: 2 // スケールを調整して解像度を上げる
-//    }).then(canvas => {
-//        canvas.toBlob(function(blob) {
-//            const link = document.createElement('a');
-//            link.href = URL.createObjectURL(blob);
-//            
-//            // 現在の日時を「yyyyMMdd_HHmmss」形式にフォーマット
-//            const now = new Date();
-//            const year = now.getFullYear();
-//            const month = String(now.getMonth() + 1).padStart(2, '0'); // 月は0から始まるので+1
-//            const day = String(now.getDate()).padStart(2, '0');
-//            const hours = String(now.getHours()).padStart(2, '0');
-//            const minutes = String(now.getMinutes()).padStart(2, '0');
-//            const seconds = String(now.getSeconds()).padStart(2, '0');
-//
-//            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
-//            link.download = `原神チェックシート_${formattedDate}.png`; // ファイル名の変更
-//            
-//            link.click();
-//        }, 'image/png');
-//    }).catch(error => {
-//        console.error('Error capturing image:', error);
-//    });
-//}
-//
-//document.addEventListener('DOMContentLoaded', () => {
-//    loadImages();
-//});
