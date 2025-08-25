@@ -437,7 +437,7 @@ async function saveImage() {
     console.error(e);
   } finally {
     // 5) 復元
-    //node.classList.remove('is-printing');
+    node.classList.remove('is-printing');
   }
 }
 

@@ -347,16 +347,11 @@ header {
 }
 
 /* 印刷用プロキシ（後でJSで中身を転記＆表示切替） */
-.print-proxy{
-  display: none;          /* まずは隠しておく */
-  white-space: pre-wrap;  /* 改行を維持 */
-  word-break: break-word; /* 長文折返し */
-  border: 1px solid #ccc;
-  padding: 4px;
-  font-size: 12px;
-  box-sizing: border-box;
-  background: #fff;
-  min-height: 42px;       /* textareaと見た目を近づける */
+.print-proxy {
+  display: none;                /* 普段は非表示 */
+  white-space: pre-wrap;        /* 改行をそのまま保持 */
+  word-wrap: break-word;        /* 長い単語も折り返す */
+  overflow-wrap: break-word;    /* 念のため追加 */
 }
 
 /* キャプチャ中は textarea を隠して print-proxy を表示 */
