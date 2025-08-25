@@ -180,6 +180,7 @@ h1 {
     padding: 3px; /* パディングを追加 */
 }
 
+/*
 .entry textarea {
     width: 100%; /* 幅を100%に設定 */
     height: 42px; /* 高さを指定 */
@@ -188,6 +189,20 @@ h1 {
     margin-top: 1px; /* 上部のマージンを追加 */
     resize: none; /* サイズ変更を無効にする */
     overflow: hidden;
+}
+*/
+.entry textarea {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    margin-top: 1px;
+    resize: none;
+    overflow: hidden;
+    font-size: 12px;
+    text-align: left;       /* ← 中身は左寄せ */
+    line-height: 1.5;       /* ← デフォルトだけど合わせるなら明示 */
+    padding: 4px;           /* ← input,textarea,label共通指定あり */
 }
 
 input, textarea, label {
@@ -346,12 +361,30 @@ header {
     overflow-y: auto;          /* ← 中身だけ縦スクロール */
 }
 
-/* 印刷用プロキシ（後でJSで中身を転記＆表示切替） */
+/*
 .print-proxy {
   display: none;                /* 普段は非表示 */
   white-space: pre-wrap;        /* 改行をそのまま保持 */
   word-wrap: break-word;        /* 長い単語も折り返す */
   overflow-wrap: break-word;    /* 念のため追加 */
+}
+*/
+.print-proxy {
+    display: none;
+    width: 100%;
+    min-height: 42px;           /* textarea の高さと揃える */
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    margin-top: 1px;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: left;
+    padding: 4px;
+
+    white-space: pre-wrap;      /* 改行をそのまま保持 */
+    overflow-wrap: break-word;  /* 長文折り返し */
+    word-break: break-word;     /* 念のため */
+    background-color: #fff;     /* textarea と揃える */
 }
 
 /* キャプチャ中は textarea を隠して print-proxy を表示 */
