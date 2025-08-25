@@ -189,23 +189,6 @@ parentNode.addEventListener('click', (event) => {
 });
 //------------------------------------------------------------------------------------------------
 
-// タブの選択状態を表示
-function updateTabSelectionsDisplay() {
-    const tabSelectionsElement = document.getElementById('tab-selections');
-    tabSelectionsElement.innerHTML = ''; // クリアしてから再描画
-
-    // tabSelectionsが空でも問題ないように対策
-    if (tabSelections && Object.keys(tabSelections).length > 0) {
-        for (const [category, selections] of Object.entries(tabSelections)) {
-            const categoryInfo = document.createElement('div');
-            categoryInfo.textContent = `${category}: ${selections.join(', ')}`;
-            tabSelectionsElement.appendChild(categoryInfo);
-        }
-    } else {
-        tabSelectionsElement.textContent = 'No selections made yet.';
-    }
-}
-
 function loadImages() {
     const tabs = document.querySelectorAll('.tab-label');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -347,17 +330,17 @@ function moveToNextTab(currentTabKey) {
       if (label) label.remove();
     }
 
-    function updateImageNumbers(tabCategory) {
-
-        const selectedCategory = tabSelections[tabCategory] || [];
-
-        selectedCategory.forEach((src, index) => {
-            const imgContainer = document.querySelector(`.image-item[data-src="${src}"]`).parentElement;
-            addNumberingAndBorder(imgContainer, index + 1);
-        });
-        tabSelections[tabCategory] = selectedCategory; // 選択状態を更新
-        //updateTabSelectionsDisplay();
-    }
+    //function updateImageNumbers(tabCategory) {
+    //
+    //    const selectedCategory = tabSelections[tabCategory] || [];
+    //
+    //    selectedCategory.forEach((src, index) => {
+    //        const imgContainer = document.querySelector(`.image-item[data-src="${src}"]`).parentElement;
+    //        addNumberingAndBorder(imgContainer, index + 1);
+    //    });
+    //    tabSelections[tabCategory] = selectedCategory; // 選択状態を更新
+    //
+    //}
 
     function restoreSelectionState(tabKey, category, scopeEl) {
       const selected = tabSelections[tabKey] || [];
@@ -380,36 +363,82 @@ function moveToNextTab(currentTabKey) {
     }
 }
 
-function saveImage() {
+//function saveImage() {
+//
+//    // imageareaを一時的に表示
+//    const imageArea = document.getElementById('savearea');
+//
+//    html2canvas(document.getElementById('savearea'), { 
+//        useCORS: true, 
+//        scale: 2 // スケールを調整して解像度を上げる
+//    }).then(canvas => {
+//        canvas.toBlob(function(blob) {
+//            const link = document.createElement('a');
+//            link.href = URL.createObjectURL(blob);
+//            
+//            // 現在の日時を「yyyyMMdd_HHmmss」形式にフォーマット
+//            const now = new Date();
+//            const year = now.getFullYear();
+//            const month = String(now.getMonth() + 1).padStart(2, '0'); // 月は0から始まるので+1
+//            const day = String(now.getDate()).padStart(2, '0');
+//            const hours = String(now.getHours()).padStart(2, '0');
+//            const minutes = String(now.getMinutes()).padStart(2, '0');
+//            const seconds = String(now.getSeconds()).padStart(2, '0');
+//
+//            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+//            link.download = `原神チェックシート_${formattedDate}.png`; // ファイル名の変更
+//            
+//            link.click();
+//        }, 'image/png');
+//    }).catch(error => {
+//        console.error('Error capturing image:', error);
+//    });
+//}
 
-    // imageareaを一時的に表示
-    const imageArea = document.getElementById('savearea');
+async function saveImage() {
+  const node = document.getElementById('savearea');
 
-    html2canvas(document.getElementById('savearea'), { 
-        useCORS: true, 
-        scale: 2 // スケールを調整して解像度を上げる
-    }).then(canvas => {
-        canvas.toBlob(function(blob) {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            
-            // 現在の日時を「yyyyMMdd_HHmmss」形式にフォーマット
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0'); // 月は0から始まるので+1
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
+  // 1) 保存モードに切替
+  node.classList.add('is-printing');
 
-            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
-            link.download = `原神チェックシート_${formattedDate}.png`; // ファイル名の変更
-            
-            link.click();
-        }, 'image/png');
-    }).catch(error => {
-        console.error('Error capturing image:', error);
+  // 2) textarea内容をproxyに転記
+  document.querySelectorAll('#savearea .entry').forEach(entry => {
+    const ta = entry.querySelector('textarea');
+    const proxy = entry.querySelector('.print-proxy');
+    if (ta && proxy) {
+      proxy.textContent = ta.value;
+    }
+  });
+
+  try {
+    // 3) キャプチャ実行
+    const canvas = await html2canvas(node, {
+      useCORS: true,
+      scale: 2
     });
+
+    // 4) ダウンロード処理
+    canvas.toBlob(function(blob) {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth()+1).padStart(2,'0');
+      const d = String(now.getDate()).padStart(2,'0');
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+
+      link.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
+      link.click();
+    }, 'image/png');
+  } catch(e) {
+    console.error(e);
+  } finally {
+    // 5) 復元
+    node.classList.remove('is-printing');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
