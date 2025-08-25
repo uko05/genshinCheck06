@@ -348,10 +348,13 @@ header {
 
 /* 印刷用プロキシ（後でJSで中身を転記＆表示切替） */
 .print-proxy {
-  display: none;                /* 普段は非表示 */
-  white-space: pre-wrap;        /* 改行をそのまま保持 */
-  word-wrap: break-word;        /* 長い単語も折り返す */
-  overflow-wrap: break-word;    /* 念のため追加 */
+  display: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  box-sizing: border-box;
+  border: 1px solid #ccc;  /* ← デフォルト */
+  padding: 4px;
 }
 
 /* キャプチャ中は textarea を隠して print-proxy を表示 */

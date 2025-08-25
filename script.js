@@ -363,81 +363,140 @@ function moveToNextTab(currentTabKey) {
     }
 }
 
-//function saveImage() {
+//-----------------------------------------------------------------------------------------
+
+//async function saveImage() {
+//  const node = document.getElementById('savearea');
 //
-//    // imageareaを一時的に表示
-//    const imageArea = document.getElementById('savearea');
+//  // 1) 保存モードに切替
+//  node.classList.add('is-printing');
 //
-//    html2canvas(document.getElementById('savearea'), { 
-//        useCORS: true, 
-//        scale: 2 // スケールを調整して解像度を上げる
-//    }).then(canvas => {
-//        canvas.toBlob(function(blob) {
-//            const link = document.createElement('a');
-//            link.href = URL.createObjectURL(blob);
-//            
-//            // 現在の日時を「yyyyMMdd_HHmmss」形式にフォーマット
-//            const now = new Date();
-//            const year = now.getFullYear();
-//            const month = String(now.getMonth() + 1).padStart(2, '0'); // 月は0から始まるので+1
-//            const day = String(now.getDate()).padStart(2, '0');
-//            const hours = String(now.getHours()).padStart(2, '0');
-//            const minutes = String(now.getMinutes()).padStart(2, '0');
-//            const seconds = String(now.getSeconds()).padStart(2, '0');
+//  // 2) textarea内容をproxyに転記
+//  document.querySelectorAll('#savearea .entry').forEach(entry => {
+//    const ta = entry.querySelector('textarea');
+//    const proxy = entry.querySelector('.print-proxy');
+//    if (ta && proxy) {
+//      proxy.textContent = ta.value;
+//    }
+//  });
 //
-//            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
-//            link.download = `原神チェックシート_${formattedDate}.png`; // ファイル名の変更
-//            
-//            link.click();
-//        }, 'image/png');
-//    }).catch(error => {
-//        console.error('Error capturing image:', error);
+//  try {
+//    // 3) キャプチャ実行
+//    const canvas = await html2canvas(node, {
+//      useCORS: true,
+//      scale: 2
 //    });
+//
+//    // 4) ダウンロード処理
+//    canvas.toBlob(function(blob) {
+//      const link = document.createElement('a');
+//      link.href = URL.createObjectURL(blob);
+//
+//      const now = new Date();
+//      const y = now.getFullYear();
+//      const m = String(now.getMonth()+1).padStart(2,'0');
+//      const d = String(now.getDate()).padStart(2,'0');
+//      const hh = String(now.getHours()).padStart(2,'0');
+//      const mm = String(now.getMinutes()).padStart(2,'0');
+//      const ss = String(now.getSeconds()).padStart(2,'0');
+//
+//      link.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
+//      link.click();
+//    }, 'image/png');
+//  } catch(e) {
+//    console.error(e);
+//  } finally {
+//    // 5) 復元
+//    node.classList.remove('is-printing');
+//  }
 //}
+
+function copyTextareaLook(ta, proxy) {
+  proxy.textContent = ta.value ?? '';
+
+  const rect = ta.getBoundingClientRect();
+  proxy.style.width     = Math.round(rect.width)  + 'px';
+  proxy.style.minHeight = Math.round(rect.height) + 'px';
+
+  const cs = getComputedStyle(ta);
+  const props = [
+    'font', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight',
+    'letterSpacing', 'wordSpacing',
+    'textAlign', 'textTransform',
+    'padding', 'boxSizing', 'color', 'backgroundColor'
+  ];
+  props.forEach(p => proxy.style[p] = cs[p]);
+
+  // borderを明示的にコピー
+  proxy.style.borderTop    = cs.borderTop;
+  proxy.style.borderRight  = cs.borderRight;
+  proxy.style.borderBottom = cs.borderBottom;
+  proxy.style.borderLeft   = cs.borderLeft;
+
+  proxy.style.whiteSpace   = 'pre-wrap';
+  proxy.style.overflowWrap = 'break-word';
+  proxy.style.wordBreak    = 'break-word';
+}
+
+function enterPrintMode() {
+  const root = document.getElementById('savearea');
+
+  // 各entryのtextarea -> proxy
+  root.querySelectorAll('.entry').forEach(entry => {
+    const ta    = entry.querySelector('textarea');
+    const proxy = entry.querySelector('.print-proxy');
+    if (ta && proxy) copyTextareaLook(ta, proxy);
+  });
+
+  // ユーザー名 input -> proxy も同様に（幅やフォント差で回り込みが変わるため）
+  const nameInput = document.getElementById('playerName');
+  const nameProxy = nameInput?.nextElementSibling?.classList.contains('print-proxy')
+    ? nameInput.nextElementSibling : null;
+  if (nameInput && nameProxy) {
+    nameProxy.textContent = nameInput.value || nameInput.placeholder || '';
+    const rect = nameInput.getBoundingClientRect();
+    nameProxy.style.width     = Math.round(rect.width)  + 'px';
+    nameProxy.style.minHeight = Math.round(rect.height) + 'px';
+    const cs = getComputedStyle(nameInput);
+    ['font','fontFamily','fontSize','fontWeight','lineHeight',
+     'letterSpacing','wordSpacing','textAlign','padding','border',
+     'boxSizing','color','backgroundColor'
+    ].forEach(p => nameProxy.style[p] = cs[p]);
+  }
+
+  root.classList.add('is-printing');   // textarea/input を隠して proxy を表示
+}
+
+function exitPrintMode() {
+  document.getElementById('savearea').classList.remove('is-printing');
+}
 
 async function saveImage() {
   const node = document.getElementById('savearea');
-
-  // 1) 保存モードに切替
-  node.classList.add('is-printing');
-
-  // 2) textarea内容をproxyに転記
-  document.querySelectorAll('#savearea .entry').forEach(entry => {
-    const ta = entry.querySelector('textarea');
-    const proxy = entry.querySelector('.print-proxy');
-    if (ta && proxy) {
-      proxy.textContent = ta.value;
-    }
-  });
-
   try {
-    // 3) キャプチャ実行
-    const canvas = await html2canvas(node, {
-      useCORS: true,
-      scale: 2
-    });
+    enterPrintMode();
 
-    // 4) ダウンロード処理
-    canvas.toBlob(function(blob) {
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
+    // 画像の読み込み待ち（既存でOK）
+    await Promise.all(Array.from(node.querySelectorAll('img'))
+      .filter(img => !img.complete || img.naturalWidth === 0)
+      .map(img => new Promise(res => {
+        img.addEventListener('load', res, { once: true });
+        img.addEventListener('error', res, { once: true });
+      }))
+    );
 
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth()+1).padStart(2,'0');
-      const d = String(now.getDate()).padStart(2,'0');
-      const hh = String(now.getHours()).padStart(2,'0');
-      const mm = String(now.getMinutes()).padStart(2,'0');
-      const ss = String(now.getSeconds()).padStart(2,'0');
-
-      link.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
-      link.click();
+    const canvas = await html2canvas(node, { useCORS: true, scale: 2 });
+    canvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const n = new Date();
+      const pad = v => String(v).padStart(2,'0');
+      a.download = `原神チェックシート_${n.getFullYear()}${pad(n.getMonth()+1)}${pad(n.getDate())}_${pad(n.getHours())}${pad(n.getMinutes())}${pad(n.getSeconds())}.png`;
+      a.click();
+      URL.revokeObjectURL(a.href);
     }, 'image/png');
-  } catch(e) {
-    console.error(e);
   } finally {
-    // 5) 復元
-    node.classList.remove('is-printing');
+    exitPrintMode();
   }
 }
 
