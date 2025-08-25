@@ -359,6 +359,14 @@ header {
   min-height: 42px;       /* textareaと見た目を近づける */
 }
 
+/* キャプチャ中は textarea を隠して print-proxy を表示 */
+.is-printing textarea {
+  display: none !important;
+}
+.is-printing .print-proxy {
+  display: block !important;
+}
+
 /* ラジオボタン非表示 */
 .tab-switch {
     display: none;
