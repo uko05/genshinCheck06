@@ -155,8 +155,10 @@ h1 {
 }
 
 .entry img {
-    width: 100%; /* 幅を100%に設定してコンテナに合わせる */
-    height: 100%; /* 高さは自動調整 */
+  width: auto;             /* ← 両方100%はやめる */
+  height: auto;            /* ← これが超重要 */
+  max-width: 100%;         /* 枠からはみ出さない */
+  max-height: 100%;        /* 枠からはみ出さない */
     object-fit: contain;
 }
 
@@ -278,6 +280,7 @@ header {
   width: 100%;                  /* 入力欄を列いっぱいに */
   min-width: 0;                 /* はみ出し防止 */
   box-sizing: border-box;
+  height: 25px;
 }
 
 .image-list {
