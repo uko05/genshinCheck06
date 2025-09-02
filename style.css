@@ -203,10 +203,12 @@ h1 {
 
 /* 違い：textareaは入力可能、print-proxyは表示専用 */
 .entry textarea {
-    resize: none;
+  resize: none;              /* ユーザーがサイズ変更できない */
+  overflow: hidden;          /* スクロールバーを出さない */
 }
 
 .print-proxy {
+  display: none;    
   white-space: pre-wrap;
   overflow-wrap: break-word;
   border: 1px solid #ccc;

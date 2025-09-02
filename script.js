@@ -288,7 +288,7 @@ function moveToNextTab(currentTabKey) {
         selected.push(src);
         addNumberingAndBorder(img.parentElement, selected.length);
         
-  moveToNextTab(tabKey);
+        moveToNextTab(tabKey);
       }
 
       tabSelections[tabKey] = selected;
@@ -366,6 +366,7 @@ async function saveImage() {
     const proxy = entry.querySelector('.print-proxy');
     if (ta && proxy) {
       proxy.textContent = ta.value;
+      proxy.style.display = 'block';   // ★ここで表示
     }
   });
 
@@ -396,10 +397,37 @@ async function saveImage() {
     console.error(e);
   } finally {
     // 5) 復元
+    document.querySelectorAll('#savearea .print-proxy').forEach(proxy => {
+      proxy.style.display = 'none';   // ← 非表示に戻す
+    });
+
     node.classList.remove('is-printing');
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     loadImages();
+    
+    const sidebar = document.getElementById('sidebar');
+    const sizeOptions = document.querySelectorAll('input[name="size-option"]');
+
+    sizeOptions.forEach(option => {
+        option.addEventListener('change', (event) => {
+            if (event.target.value === 'default') {
+                sidebar.style.display = 'block';   // ← 左バー表示
+            } else if (event.target.value === 'hakai') {
+                sidebar.style.display = 'none';    // ← 左バー非表示
+            }
+        });
+    });
+    
+    // ★ ここから追記：textareaを2行制限にする処理
+    document.querySelectorAll('#savearea .entry textarea').forEach(ta => {
+        ta.addEventListener('input', () => {
+            const lines = ta.value.split('\n');
+            if (lines.length > 2) {
+                ta.value = lines.slice(0, 2).join('\n');
+            }
+        });
+    });
 });
