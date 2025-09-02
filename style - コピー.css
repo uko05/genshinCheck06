@@ -143,7 +143,6 @@ h1 {
     padding: 20px 0px 40px 0px;
     position: relative; /* 親要素を相対位置に設定 */
 }
-
 .container {
     display: grid;
     grid-template-columns: repeat(4, 200px); /* 横に6枚表示 */
@@ -332,7 +331,7 @@ header {
     flex-wrap: wrap;
     width: 850px; /* 上部の表（grid）の幅に合わせる */
     margin: 5px auto; /* 中央寄せ */
-    background: #fff;  
+  background: #fff;  
 }
 
 .tab-label {
@@ -470,33 +469,33 @@ header {
 }
 
 /* スマホの縦画面表示に対応 */
-@media only screen and (max-width: 932px) {
+@media only screen and (max-width: 768px) {
+    .container {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(100px, 1fr)); /* 各列を100px固定 */
+        gap: 5px; /* 少し隙間をあける */
+        padding: 10px;
+        max-width: 100%; /* コンテナの幅を画面に合わせる */
+        overflow-x: auto; /* 横スクロールを有効化 */
+        justify-content: start; /* スクロール位置を左に固定 */
+    }
 
-.image-list {
-    gap: 1px;
-}
+    .cell {
+        width: 100%;
+        height: auto; /* 高さを自動調整 */
+        border-radius: 5px; /* 角を少し丸める */
+    }
 
-.image-list img {
-    width: 65px; /* 画像の幅を固定 */
-    height: 65px; /* 画像の高さを固定 */
-}
-
-.tab-switch:checked + .tab-label + .tab-content {
-    height: 320px;
-    padding: 3px;
-}
-
-.tab-wrap {
-    font-size: 12px;
-    width: 320px;
-}
+    .tabs {
+        flex-direction: column; /* タブを縦並びに */
+    }
 
     h1 {
-        font-size: 15px; /* タイトルのフォントサイズを縮小 */
+        font-size: 20px; /* タイトルのフォントサイズを縮小 */
     }
 
     #save-button {
-        padding: 10px 30px; /* ボタンのサイズを縮小 */
+        padding: 10px 40px; /* ボタンのサイズを縮小 */
         font-size: 14px;
     }
 }
