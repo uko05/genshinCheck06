@@ -355,57 +355,129 @@ function moveToNextTab(currentTabKey) {
 }
 
 //-----------------------------------------------------------------------------------------
-
 async function saveImage() {
   const node = document.getElementById('savearea');
+  if (!node) return;
 
-  // 1) 保存モードに切替
+  // モバイル判定
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
+
+  // 表示切替（印刷用モード）
   node.classList.add('is-printing');
 
-  // 2) textarea内容をproxyに転記
+  // textarea → print-proxy 転記＆表示
   document.querySelectorAll('#savearea .entry').forEach(entry => {
     const ta = entry.querySelector('textarea');
     const proxy = entry.querySelector('.print-proxy');
     if (ta && proxy) {
-      proxy.textContent = ta.value;
-      proxy.style.display = 'block';   // ★ここで表示
+      proxy.textContent = ta.value ?? '';
+      proxy.style.display = 'block';
     }
   });
 
   try {
-    // 3) キャプチャ実行
-    const canvas = await html2canvas(node, {
-      useCORS: true,
-      scale: 2
-    });
+    // キャプチャ
+    const canvas = await html2canvas(node, { useCORS: true, scale: 2 });
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+    if (!blob) throw new Error('Blob 作成に失敗');
 
-    // 4) ダウンロード処理
-    canvas.toBlob(function(blob) {
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
+    // ファイル名：yyyyMMdd_HHmmss
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const filename = `原神チェックシート_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.png`;
 
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth()+1).padStart(2,'0');
-      const d = String(now.getDate()).padStart(2,'0');
-      const hh = String(now.getHours()).padStart(2,'0');
-      const mm = String(now.getMinutes()).padStart(2,'0');
-      const ss = String(now.getSeconds()).padStart(2,'0');
+    if (isMobile) {
+      // 共有シート優先
+      try {
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: '原神チェックシート',
+            text: '写真アプリに保存してね'
+          });
+          return; // 共有で完了
+        }
+      } catch (e) {
+        console.warn('Share canceled/failed, fallback.', e);
+      }
+      // 共有不可端末 → 新規タブで開いて長押し保存
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 60 * 1000);
+      return;
+    }
 
-      link.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
-      link.click();
-    }, 'image/png');
-  } catch(e) {
-    console.error(e);
+    // PC：即ダウンロード
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60 * 1000);
+
+  } catch (e) {
+    console.error('Error capturing image:', e);
+    alert('画像の保存に失敗しました。もう一度お試しください。');
   } finally {
-    // 5) 復元
-    document.querySelectorAll('#savearea .print-proxy').forEach(proxy => {
-      proxy.style.display = 'none';   // ← 非表示に戻す
-    });
-
+    // 表示を元に戻す
+    document.querySelectorAll('#savearea .print-proxy').forEach(p => p.style.display = 'none');
     node.classList.remove('is-printing');
   }
 }
+
+//async function saveImage() {
+//  const node = document.getElementById('savearea');
+//
+//  // 1) 保存モードに切替
+//  node.classList.add('is-printing');
+//
+//  // 2) textarea内容をproxyに転記
+//  document.querySelectorAll('#savearea .entry').forEach(entry => {
+//    const ta = entry.querySelector('textarea');
+//    const proxy = entry.querySelector('.print-proxy');
+//    if (ta && proxy) {
+//      proxy.textContent = ta.value;
+//      proxy.style.display = 'block';   // ★ここで表示
+//    }
+//  });
+//
+//  try {
+//    // 3) キャプチャ実行
+//    const canvas = await html2canvas(node, {
+//      useCORS: true,
+//      scale: 2
+//    });
+//
+//    // 4) ダウンロード処理
+//    canvas.toBlob(function(blob) {
+//      const link = document.createElement('a');
+//      link.href = URL.createObjectURL(blob);
+//
+//      const now = new Date();
+//      const y = now.getFullYear();
+//      const m = String(now.getMonth()+1).padStart(2,'0');
+//      const d = String(now.getDate()).padStart(2,'0');
+//      const hh = String(now.getHours()).padStart(2,'0');
+//      const mm = String(now.getMinutes()).padStart(2,'0');
+//      const ss = String(now.getSeconds()).padStart(2,'0');
+//
+//      link.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
+//      link.click();
+//    }, 'image/png');
+//  } catch(e) {
+//    console.error(e);
+//  } finally {
+//    // 5) 復元
+//    document.querySelectorAll('#savearea .print-proxy').forEach(proxy => {
+//      proxy.style.display = 'none';   // ← 非表示に戻す
+//    });
+//
+//    node.classList.remove('is-printing');
+//  }
+//}
 
 document.addEventListener('DOMContentLoaded', () => {
     loadImages();
