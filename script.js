@@ -114,6 +114,7 @@ const imageData = [
     { src: 'hotaru.png', category: 'chara' },
     { src: 'sora.png', category: 'chara' },
     
+    { src: 'version/luna2.png', category: 'version' },
     { src: 'version/luna1.png', category: 'version' },
     { src: 'version/5_8.png', category: 'version' },
     { src: 'version/5_7.png', category: 'version' },
