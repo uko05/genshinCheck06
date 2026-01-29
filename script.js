@@ -171,6 +171,83 @@ const SELECTED_LABEL = '☑';
 // タブごとの選択状態を管理するためのオブジェクト
 const tabSelections = {};
 
+const i18n = {
+  ja: {
+    default: "デフォルト",
+    hakai: "左バー消滅",
+    title: "#原神チェックシート",
+    username: "ユーザー名:",
+    q1: "Q1.始めた時期は？",
+    q2: "Q2.好きなバージョンは？",
+    q3: "Q3.推しキャラは？",
+    q4: "Q4.髪型が似てるキャラは？",
+    q5: "Q5.親友にするなら？",
+    q6: "Q6.結婚するなら？",
+    q7: "Q7.同じ声になれるなら？",
+    q8: "Q8.１日入れ替わるなら？",
+    q9: "Q9.着てみたい<br>キャラの服装は？",
+    q10: "Q10.同じ元素スキルを<br>使えるなら？",
+    q11: "Q11.最初に引いた星５は？<br>(恒常除く)",
+    q12: "Q12.一番欲しいキャラは？",
+  },
+  en: {
+    default: "Default",
+    hakai: "Hide Left Bar",
+    title: "#Genshin Check Sheet",
+    username: "Name:",
+    q1:  "Q1.When did you start?",
+    q2:  "Q2.Favorite version?",
+    q3:  "Q3.Favorite character?",
+    q4:  "Q4.Similar hairstyle?",
+    q5:  "Q5.Best friend?",
+    q6:  "Q6.Who would you marry?",
+    q7:  "Q7.Whose voice?",
+    q8:  "Q8.One-day body swap?",
+    q9:  "Q9.Outfit you’d wear?",
+    q10: "Q10.Elemental Skill you’d use?",
+    q11: "Q11.First limited 5★?",
+    q12: "Q12.Most wanted character?"
+
+  }
+};
+
+// ===== i18n適用 =====
+function applyLang(lang) {
+  const dict = i18n[lang] || i18n.ja;
+
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.dataset.i18n;
+    const val = dict[key];
+    if (val == null) return;
+
+    // <br> を含むときだけHTMLとして反映
+    if (typeof val === "string" && val.includes("<br>")) {
+      el.innerHTML = val;
+    } else {
+      el.textContent = val;
+    }
+  });
+
+  localStorage.setItem("lang", lang);
+}
+
+// ラジオボタンの監視
+function initLangSwitch() {
+  const saved = localStorage.getItem("lang") || "ja";
+  const radio = document.querySelector(`input[name="lang"][value="${saved}"]`);
+  if (radio) radio.checked = true;
+
+  // 初期適用
+  applyLang(saved);
+
+  // change適用（全ラジオに付与）
+  document.querySelectorAll('input[name="lang"]').forEach(r => {
+    r.addEventListener("change", (e) => {
+      applyLang(e.target.value);
+    });
+  });
+}
+
 //------------------------------------------------------------------------------------------------
 const toggleButton = document.getElementById('toggle-button');
 const sidebar = document.getElementById('sidebar');
@@ -433,60 +510,17 @@ async function saveImage() {
   }
 }
 
-//async function saveImage() {
-//  const node = document.getElementById('savearea');
-//
-//  // 1) 保存モードに切替
-//  node.classList.add('is-printing');
-//
-//  // 2) textarea内容をproxyに転記
-//  document.querySelectorAll('#savearea .entry').forEach(entry => {
-//    const ta = entry.querySelector('textarea');
-//    const proxy = entry.querySelector('.print-proxy');
-//    if (ta && proxy) {
-//      proxy.textContent = ta.value;
-//      proxy.style.display = 'block';   // ★ここで表示
-//    }
-//  });
-//
-//  try {
-//    // 3) キャプチャ実行
-//    const canvas = await html2canvas(node, {
-//      useCORS: true,
-//      scale: 2
-//    });
-//
-//    // 4) ダウンロード処理
-//    canvas.toBlob(function(blob) {
-//      const link = document.createElement('a');
-//      link.href = URL.createObjectURL(blob);
-//
-//      const now = new Date();
-//      const y = now.getFullYear();
-//      const m = String(now.getMonth()+1).padStart(2,'0');
-//      const d = String(now.getDate()).padStart(2,'0');
-//      const hh = String(now.getHours()).padStart(2,'0');
-//      const mm = String(now.getMinutes()).padStart(2,'0');
-//      const ss = String(now.getSeconds()).padStart(2,'0');
-//
-//      link.download = `原神チェックシート_${y}${m}${d}_${hh}${mm}${ss}.png`;
-//      link.click();
-//    }, 'image/png');
-//  } catch(e) {
-//    console.error(e);
-//  } finally {
-//    // 5) 復元
-//    document.querySelectorAll('#savearea .print-proxy').forEach(proxy => {
-//      proxy.style.display = 'none';   // ← 非表示に戻す
-//    });
-//
-//    node.classList.remove('is-printing');
-//  }
-//}
-
 document.addEventListener('DOMContentLoaded', () => {
+    initLangSwitch(); 
     loadImages();
     
+    // 画像生成などでDOMが増えた後に、現在の言語でもう一度適用
+    const currentLang =
+      document.querySelector('input[name="lang"]:checked')?.value ||
+      localStorage.getItem("lang") ||
+      "ja";
+    applyLang(currentLang);
+
     const sidebar = document.getElementById('sidebar');
     const sizeOptions = document.querySelectorAll('input[name="size-option"]');
 

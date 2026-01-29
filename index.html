@@ -34,12 +34,30 @@
 </head>
 <body>
     <header>
+        <div class="lang-switch">
+          <label>
+            <input type="radio" name="lang" value="ja" checked>
+            日本語
+          </label>
+          <label>
+            <input type="radio" name="lang" value="en">
+            English
+          </label>
+        </div>
+
         <div class="sticky-header">
           <h1><button id="save-button">Save Image</button></h1>
         </div>
         <div>
-            <label><input type="radio" name="size-option" value="default" checked> デフォルト </label>
-            <label><input type="radio" name="size-option" value="hakai"> 左バー消滅 </label>
+            <label>
+              <input type="radio" name="size-option" value="default" checked>
+              <span data-i18n="default">デフォルト</span>
+            </label>
+
+            <label>
+              <input type="radio" name="size-option" value="hakai">
+              <span data-i18n="hakai">左バー消滅</span>
+            </label>
         </div>
     </header>
     
@@ -81,7 +99,7 @@
      <!-- ----------------------------左ペイン------------------------------------------- -->
     <div class="tab-wrap">
         <input id="TAB-01" type="radio" name="TAB" class="tab-switch" checked="checked" />
-        <label class="tab-label" for="TAB-01" data-category="version">Q1.始めた時期は？</label>
+        <label class="tab-label" for="TAB-01" data-category="version" data-i18n="q1">Q1.始めた時期は？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -89,7 +107,7 @@
         </div>
         
         <input id="TAB-02" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-02" data-category="version">Q2.好きなバージョンは？</label>
+        <label class="tab-label" for="TAB-02" data-category="version" data-i18n="q2">Q2.好きなバージョンは？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -97,7 +115,7 @@
         </div>
         
         <input id="TAB-03" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-03" data-category="chara">Q3.推しキャラは？</label>
+        <label class="tab-label" for="TAB-03" data-category="chara" data-i18n="q3">Q3.推しキャラは？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -105,7 +123,7 @@
         </div>
         
         <input id="TAB-04" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-04" data-category="chara">Q4.髪型が似てるキャラは？</label>
+        <label class="tab-label" for="TAB-04" data-category="chara" data-i18n="q4">Q4.髪型が似てるキャラは？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -113,7 +131,7 @@
         </div>
         
         <input id="TAB-05" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-05" data-category="chara">Q5.親友にするなら？</label>
+        <label class="tab-label" for="TAB-05" data-category="chara" data-i18n="q5">Q5.親友にするなら？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -121,7 +139,7 @@
         </div>
         
         <input id="TAB-06" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-06" data-category="chara">Q6.結婚するなら？</label>
+        <label class="tab-label" for="TAB-06" data-category="chara" data-i18n="q6">Q6.結婚するなら？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -129,7 +147,7 @@
         </div>
         
         <input id="TAB-07" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-07" data-category="chara">Q7.同じ声になれるなら？</label>
+        <label class="tab-label" for="TAB-07" data-category="chara" data-i18n="q7">Q7.同じ声になれるなら？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -137,7 +155,7 @@
         </div>
         
         <input id="TAB-08" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-08" data-category="chara">Q8.１日入れ替わるなら？</label>
+        <label class="tab-label" for="TAB-08" data-category="chara" data-i18n="q8">Q8.１日入れ替わるなら？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -145,7 +163,7 @@
         </div>
         
         <input id="TAB-09" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-09" data-category="chara">Q9.着てみたい<br>キャラの服装は？</label>
+        <label class="tab-label" for="TAB-09" data-category="chara" data-i18n="q9">Q9.着てみたいキャラの服装は？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -153,7 +171,7 @@
         </div>
         
         <input id="TAB-10" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-10" data-category="chara">Q10.同じ元素スキルを<br>使えるなら？</label>
+        <label class="tab-label" for="TAB-10" data-category="chara" data-i18n="q10">Q10.同じ元素スキルを使えるなら？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -161,7 +179,7 @@
         </div>
         
         <input id="TAB-11" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-11" data-category="chara">Q11.最初に引いた星５は？<br>(主人公除く)</label>
+        <label class="tab-label" for="TAB-11" data-category="chara" data-i18n="q11">Q11.最初に引いた星５は？(恒常除く)</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -169,7 +187,7 @@
         </div>
         
         <input id="TAB-12" type="radio" name="TAB" class="tab-switch" />
-        <label class="tab-label" for="TAB-12" data-category="chara">Q12.一番欲しいキャラは？</label>
+        <label class="tab-label" for="TAB-12" data-category="chara" data-i18n="q12">Q12.一番欲しいキャラは？</label>
         <div class="tab-content">
             <div class="image-list">
                 <!-- サムネイル画像をJavaScriptで追加します -->
@@ -178,7 +196,7 @@
     </div>
 
     <div id="savearea">
-        <h1>#原神チェックシート</h1>
+        <h1 data-i18n="title">#原神チェックシート</h1>
         <div class="info-item-yoko">
             <div class="label label-even">ユーザー名：</div>
             <input id="playerName" class="value-yoko" type="text" placeholder="あなたの名前を書いてね！">
@@ -187,7 +205,7 @@
         <div class="container" id="grid">
         <!-- 選択したキャラの画像・名前入力・説明入力 -->
             <div class="entry" data-key="TAB-01">
-                <label>Q1.始めた時期は？</label>
+                <label data-i18n="q1">Q1.始めた時期は？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -196,7 +214,7 @@
             </div>
             
             <div class="entry" data-key="TAB-02">
-                <label>Q2.好きなバージョンは？</label>
+                <label data-i18n="q2">Q2.好きなバージョンは？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -205,7 +223,7 @@
             </div>
             
             <div class="entry" data-key="TAB-03">
-                <label>Q3.推しキャラは？</label>
+                <label data-i18n="q3">Q3.推しキャラは？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -214,7 +232,7 @@
             </div>
             
             <div class="entry" data-key="TAB-04">
-                <label>Q4.髪型が似てるキャラは？</label>
+                <label data-i18n="q4">Q4.髪型が似てるキャラは？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -223,7 +241,7 @@
             </div>
             
             <div class="entry" data-key="TAB-05">
-                <label>Q5.親友にするなら？</label>
+                <label data-i18n="q5">Q5.親友にするなら？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -232,7 +250,7 @@
             </div>
             
             <div class="entry" data-key="TAB-06">
-                <label>Q6.結婚するなら？</label>
+                <label data-i18n="q6">Q6.結婚するなら？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -241,7 +259,7 @@
             </div>
             
             <div class="entry" data-key="TAB-07">
-                <label>Q7.同じ声になれるなら？</label>
+                <label data-i18n="q7">Q7.同じ声になれるなら？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -250,7 +268,7 @@
             </div>
             
             <div class="entry" data-key="TAB-08">
-                <label>Q8.１日入れ替わるなら？</label>
+                <label data-i18n="q8">Q8.１日入れ替わるなら？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -259,7 +277,7 @@
             </div>
             
             <div class="entry" data-key="TAB-09">
-                <label>Q9.着てみたいキャラの服装は？</label>
+                <label data-i18n="q9">Q9.着てみたいキャラの服装は？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -268,7 +286,7 @@
             </div>
             
             <div class="entry" data-key="TAB-10">
-                <label>Q10.同じ元素スキルを使えるなら？</label>
+                <label data-i18n="q10">Q10.同じ元素スキルを使えるなら？</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -277,7 +295,7 @@
             </div>
             
             <div class="entry" data-key="TAB-11">
-                <label>Q11.最初に引いた星５キャラは？(主人公除く)</label>
+                <label data-i18n="q11">Q11.最初に引いた星５キャラは？(主人公除く)</label>
                 <div class="imgheight">
                     <img >
                 </div>
@@ -286,7 +304,7 @@
             </div>
             
             <div class="entry" data-key="TAB-12">
-                <label>Q12.今一番欲しいキャラは？</label>
+                <label data-i18n="q12">Q12.今一番欲しいキャラは？</label>
                 <div class="imgheight">
                     <img >
                 </div>
