@@ -1,5 +1,6 @@
 const imageFolder = 'chara/';
 const imageData = [
+    { src: 'linnea.png', category: 'chara' },
     { src: 'rooen.png', category: 'chara' },
     { src: 'iruga.png', category: 'chara' },
     { src: 'shihaku.png', category: 'chara' },
