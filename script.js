@@ -301,7 +301,7 @@ function loadImages() {
       });
     }
     
-    function setSaveImage(tabKey, src) {
+    function setSaveImage(tabKey, src, category) {
       // 該当する保存枠を探す
       const entry = document.querySelector(`#savearea .entry[data-key="${tabKey}"]`);
       if (!entry) return;
@@ -310,7 +310,7 @@ function loadImages() {
       if (!img) return;
 
       if (src) {
-        img.src = `${tabKey === 'version' ? versionFolder : imageFolder}${src}`;  // フォルダ＋ファイル名
+        img.src = `${category === 'version' ? versionFolder : imageFolder}${src}`;  // フォルダ＋ファイル名
         img.alt = src;
         img.dataset.src = src;
       } else {
@@ -358,8 +358,8 @@ function moveToNextTab(currentTabKey) {
 
       tabSelections[tabKey] = selected;
       
-      setSaveImage(tabKey, selected[0] || null);
-  
+      setSaveImage(tabKey, selected[0] || null, img.dataset.category);
+
       updateImageNumbers(tabKey, scopeEl);
     }
 
@@ -404,7 +404,7 @@ function moveToNextTab(currentTabKey) {
         }
       });
       updateImageNumbers(tabKey, scopeEl);
-      setSaveImage(tabKey, selected[0] || null);
+      setSaveImage(tabKey, selected[0] || null, category);
     }
 
     // 保存ボタンのクリックイベントを追加
