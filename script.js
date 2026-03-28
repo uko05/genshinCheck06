@@ -1,4 +1,5 @@
 const imageFolder = 'https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/01_Genshin/chara_full/';
+const versionFolder = 'https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/01_Genshin/version/';
 const imageData = [
     { src: 'linnea.png', category: 'chara' },
     { src: 'rooen.png', category: 'chara' },
@@ -118,55 +119,55 @@ const imageData = [
     { src: 'hotaru.png', category: 'chara' },
     { src: 'sora.png', category: 'chara' },
     
-    { src: 'version/luna6.png', category: 'version' },
-    { src: 'version/luna5.png', category: 'version' },
-    { src: 'version/luna4.png', category: 'version' },
-    { src: 'version/luna3.png', category: 'version' },
-    { src: 'version/luna2.png', category: 'version' },
-    { src: 'version/luna1.png', category: 'version' },
-    { src: 'version/5_8.png', category: 'version' },
-    { src: 'version/5_7.png', category: 'version' },
-    { src: 'version/5_6.png', category: 'version' },
-    { src: 'version/5_5.png', category: 'version' },
-    { src: 'version/5_4.png', category: 'version' },
-    { src: 'version/5_3.png', category: 'version' },
-    { src: 'version/5_2.png', category: 'version' },
-    { src: 'version/5_1.png', category: 'version' },
-    { src: 'version/5_0.png', category: 'version' },
-    { src: 'version/4_8.png', category: 'version' },
-    { src: 'version/4_7.png', category: 'version' },
-    { src: 'version/4_6.png', category: 'version' },
-    { src: 'version/4_5.png', category: 'version' },
-    { src: 'version/4_4.png', category: 'version' },
-    { src: 'version/4_3.png', category: 'version' },
-    { src: 'version/4_2.png', category: 'version' },
-    { src: 'version/4_1.png', category: 'version' },
-    { src: 'version/4_0.png', category: 'version' },
-    { src: 'version/3_8.png', category: 'version' },
-    { src: 'version/3_7.png', category: 'version' },
-    { src: 'version/3_6.png', category: 'version' },
-    { src: 'version/3_5.png', category: 'version' },
-    { src: 'version/3_4.png', category: 'version' },
-    { src: 'version/3_3.png', category: 'version' },
-    { src: 'version/3_2.png', category: 'version' },
-    { src: 'version/3_1.png', category: 'version' },
-    { src: 'version/3_0.png', category: 'version' },
-    { src: 'version/2_8.png', category: 'version' },
-    { src: 'version/2_7.png', category: 'version' },
-    { src: 'version/2_6.png', category: 'version' },
-    { src: 'version/2_5.png', category: 'version' },
-    { src: 'version/2_4.png', category: 'version' },
-    { src: 'version/2_3.png', category: 'version' },
-    { src: 'version/2_2.png', category: 'version' },
-    { src: 'version/2_1.png', category: 'version' },
-    { src: 'version/2_0.png', category: 'version' },
-    { src: 'version/1_6.png', category: 'version' },
-    { src: 'version/1_5.png', category: 'version' },
-    { src: 'version/1_4.png', category: 'version' },
-    { src: 'version/1_3.png', category: 'version' },
-    { src: 'version/1_2.png', category: 'version' },
-    { src: 'version/1_1.png', category: 'version' },
-    { src: 'version/1_0.png', category: 'version' }
+    { src: 'luna6.png', category: 'version' },
+    { src: 'luna5.png', category: 'version' },
+    { src: 'luna4.png', category: 'version' },
+    { src: 'luna3.png', category: 'version' },
+    { src: 'luna2.png', category: 'version' },
+    { src: 'luna1.png', category: 'version' },
+    { src: '5_8.png', category: 'version' },
+    { src: '5_7.png', category: 'version' },
+    { src: '5_6.png', category: 'version' },
+    { src: '5_5.png', category: 'version' },
+    { src: '5_4.png', category: 'version' },
+    { src: '5_3.png', category: 'version' },
+    { src: '5_2.png', category: 'version' },
+    { src: '5_1.png', category: 'version' },
+    { src: '5_0.png', category: 'version' },
+    { src: '4_8.png', category: 'version' },
+    { src: '4_7.png', category: 'version' },
+    { src: '4_6.png', category: 'version' },
+    { src: '4_5.png', category: 'version' },
+    { src: '4_4.png', category: 'version' },
+    { src: '4_3.png', category: 'version' },
+    { src: '4_2.png', category: 'version' },
+    { src: '4_1.png', category: 'version' },
+    { src: '4_0.png', category: 'version' },
+    { src: '3_8.png', category: 'version' },
+    { src: '3_7.png', category: 'version' },
+    { src: '3_6.png', category: 'version' },
+    { src: '3_5.png', category: 'version' },
+    { src: '3_4.png', category: 'version' },
+    { src: '3_3.png', category: 'version' },
+    { src: '3_2.png', category: 'version' },
+    { src: '3_1.png', category: 'version' },
+    { src: '3_0.png', category: 'version' },
+    { src: '2_8.png', category: 'version' },
+    { src: '2_7.png', category: 'version' },
+    { src: '2_6.png', category: 'version' },
+    { src: '2_5.png', category: 'version' },
+    { src: '2_4.png', category: 'version' },
+    { src: '2_3.png', category: 'version' },
+    { src: '2_2.png', category: 'version' },
+    { src: '2_1.png', category: 'version' },
+    { src: '2_0.png', category: 'version' },
+    { src: '1_6.png', category: 'version' },
+    { src: '1_5.png', category: 'version' },
+    { src: '1_4.png', category: 'version' },
+    { src: '1_3.png', category: 'version' },
+    { src: '1_2.png', category: 'version' },
+    { src: '1_1.png', category: 'version' },
+    { src: '1_0.png', category: 'version' }
 ];
 
 const MAX_SELECTION = 1;
@@ -289,7 +290,7 @@ function loadImages() {
         wrap.classList.add('image-container');
 
         const img = document.createElement('img');
-        img.src = `${imageFolder}${imgData.src}`;
+        img.src = `${imgData.category === 'version' ? versionFolder : imageFolder}${imgData.src}`;
         img.dataset.src = imgData.src;
         img.dataset.category = imgData.category;
         img.classList.add('image-item');
@@ -309,7 +310,7 @@ function loadImages() {
       if (!img) return;
 
       if (src) {
-        img.src = `${imageFolder}${src}`;  // フォルダ＋ファイル名
+        img.src = `${tabKey === 'version' ? versionFolder : imageFolder}${src}`;  // フォルダ＋ファイル名
         img.alt = src;
         img.dataset.src = src;
       } else {
