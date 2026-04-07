@@ -1,4 +1,5 @@
 import { genshinChars, genshinVersions } from 'https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/01_Genshin/chara_data/genshin_chars.js';
+import { submitVotes } from './checkSheetVotes.js';
 
 const imageFolder = 'https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/01_Genshin/chara_full/';
 const versionFolder = 'https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/01_Genshin/version/';
@@ -258,6 +259,8 @@ function moveToNextTab(currentTabKey) {
 async function saveImage() {
   const node = document.getElementById('savearea');
   if (!node) return;
+
+  submitVotes(tabSelections);
 
   // モバイル判定
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
