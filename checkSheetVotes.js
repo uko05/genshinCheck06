@@ -2,18 +2,21 @@
 import { db } from './firebaseConfig.js';
 import {
   doc,
-  setDoc,
-  increment,
+  runTransaction,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-// checkSheetVotes/{questionId} = { "ナヴィア.png": 42, "フリーナ.png": 15, ... }
+// checkSheetVotes/{questionId}/characters/{characterFile} = { count, updatedAt }
 async function incrementVote(questionId, characterFile) {
-  const ref = doc(db, "checkSheetVotes", questionId);
-  await setDoc(ref, {
-    [characterFile]: increment(1),
-    updatedAt: serverTimestamp()
-  }, { merge: true });
+  const ref = doc(db, "checkSheetVotes", questionId, "characters", characterFile);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) {
+      tx.set(ref, { count: 1, updatedAt: serverTimestamp() });
+    } else {
+      tx.update(ref, { count: snap.data().count + 1, updatedAt: serverTimestamp() });
+    }
+  });
 }
 
 // tabSelections = { "TAB-03": ["ナヴィア.png"], "TAB-06": ["フリーナ.png"], ... }
