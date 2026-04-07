@@ -6,9 +6,25 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+const QUESTION_LABELS = {
+  'TAB-01': 'TAB-01_始めた時期は？',
+  'TAB-02': 'TAB-02_好きなバージョンは？',
+  'TAB-03': 'TAB-03_推しキャラは？',
+  'TAB-04': 'TAB-04_髪型が似てるキャラは？',
+  'TAB-05': 'TAB-05_親友にするなら？',
+  'TAB-06': 'TAB-06_結婚するなら？',
+  'TAB-07': 'TAB-07_同じ声になれるなら？',
+  'TAB-08': 'TAB-08_１日入れ替わるなら？',
+  'TAB-09': 'TAB-09_着てみたいキャラの服装は？',
+  'TAB-10': 'TAB-10_同じ元素スキルを使えるなら？',
+  'TAB-11': 'TAB-11_最初に引いた星５は？',
+  'TAB-12': 'TAB-12_一番欲しいキャラは？',
+};
+
 // checkSheetVotes/{questionId}/characters/{characterFile} = { count, updatedAt }
 async function incrementVote(questionId, characterFile) {
-  const ref = doc(db, "checkSheetVotes", questionId, "characters", characterFile);
+  const docId = QUESTION_LABELS[questionId] ?? questionId;
+  const ref = doc(db, "checkSheetVotes", docId, "characters", characterFile);
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
     if (!snap.exists()) {
@@ -19,7 +35,7 @@ async function incrementVote(questionId, characterFile) {
   });
 }
 
-// tabSelections = { "TAB-03": ["ナヴィア.png"], "TAB-06": ["フリーナ.png"], ... }
+// tabSelections = { "TAB-03": ["ナヴィア.png"], ... }
 export async function submitVotes(tabSelections) {
   const promises = Object.entries(tabSelections)
     .filter(([, selected]) => selected.length > 0)

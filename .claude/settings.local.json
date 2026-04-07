@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/20_GitHub/02_TiersList/**)",
+      "Read(//e/20_GitHub/03_TiersList/**)"
+    ]
+  }
+}
